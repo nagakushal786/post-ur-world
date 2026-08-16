@@ -1,23 +1,31 @@
 -- CLEAN LAYERED ARCHITECTURE
 
 -- SEPERATION OF CONCERNS:
-Each level in your program should be seperate by a clear barrier, the
-transport layer, the service layer, the storage layer...
+Each level in your program should be seperate by a clear barrier, the transport layer, the service layer, the storage layer...
 
 -- DEPENDENCY INVERSION PRINCIPLE (DIP):
-You are injecting the dependencies in your layers. You dont directly
-call them. It promotes loose coupling and makes it easier to test the
-programs.
+You are injecting the dependencies in your layers. You dont directly call them. It promotes loose coupling and makes it easier to test the programs.
 
 -- ADAPTABILITY TO CHANGE:
-By organising the code in a modular and flexible way, you can more
-easily introduce new features, refactor existing code and respond to
-evolving business requirements.
+By organising the code in a modular and flexible way, you can more easily introduce new features, refactor existing code and respond to evolving business requirements.
 
 -- REQUIREMENTS
-1. Router: github.com/go-chi/chi/v5 (get)
-2. Hot reloading: github.com/air-verse/air@latest (install)
+1. Router: https://github.com/go-chi/chi/v5 (get)
+2. Hot reloading: https://github.com/air-verse/air@latest (install)
    -> Run the command "air init"
    -> Make sure to edit the required fields in .air.toml file
    -> Our run command becomes "air"
-3. env: github.com/joho/godotenv
+3. env: https://github.com/joho/godotenv
+4. Postgres driver: https://github.com/lib/pq
+5. To compose docker.yml file: docker compose up --build
+6. SQL migrations: https://github.com/golang-migrate/migrate
+7. To create migrations:
+   migrate create -seq -ext sql -dir ./cmd/migrate/migrations create_users
+
+   -seq: sequential
+   -ext: extension
+   -dir: destination directory to generate
+8. To run up migrations:
+   migrate -path=./cmd/migrate/migrations -database="DB_URL in .env" up
+9. To run down migrations:
+   migrate -path=./cmd/migrate/migrations -database="DB_URL in .env" down

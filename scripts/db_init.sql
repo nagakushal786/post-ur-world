@@ -1,0 +1,2 @@
+CREATE DATABASE post_ur_world;
+CREATE EXTENSION IF NOT EXISTS citext;

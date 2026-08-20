@@ -15,8 +15,8 @@ By organising the code in a modular and flexible way, you can more easily introd
    -> Run the command "air init"
    -> Make sure to edit the required fields in .air.toml file
    -> Our run command becomes "air"
-3. env: https://github.com/joho/godotenv
-4. Postgres driver: https://github.com/lib/pq
+3. env: https://github.com/joho/godotenv (get)
+4. Postgres driver: https://github.com/lib/pq (get)
 5. To compose docker.yml file: docker compose up --build
 6. SQL migrations: https://github.com/golang-migrate/migrate
 7. To create migrations:
@@ -29,3 +29,7 @@ By organising the code in a modular and flexible way, you can more easily introd
    migrate -path=./cmd/migrate/migrations -database="DB_URL in .env" up
 9. To run down migrations:
    migrate -path=./cmd/migrate/migrations -database="DB_URL in .env" down
+10. Validator: https://github.com/go-playground/validator/v10 (get)
+11. To test the concurrency of users updating a post: go run scripts/test_concurrency.go
+12. Since we dont care about the existing data, firstly to remove the existing data before seeding, run: TRUNCATE TABLE comments, posts, users RESTART IDENTITY CASCADE;
+13. To create the seed for the database: go run cmd/migrate/seed/main.go

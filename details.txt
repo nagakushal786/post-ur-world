@@ -18,7 +18,7 @@ By organising the code in a modular and flexible way, you can more easily introd
 3. env: https://github.com/joho/godotenv (get)
 4. Postgres driver: https://github.com/lib/pq (get)
 5. To compose docker.yml file: docker compose up --build
-6. SQL migrations: https://github.com/golang-migrate/migrate
+6. SQL migrations: https://github.com/golang-migrate/migrate (install)
 7. To create migrations:
    migrate create -seq -ext sql -dir ./cmd/migrate/migrations create_users
 

@@ -9,6 +9,7 @@ import (
 
 var (
 	ErrNotFound=errors.New("Resource not found")
+	ErrConflict=errors.New("Resource already exists")
 	QueryTimeoutDuration=time.Second*5
 )
 
@@ -18,13 +19,19 @@ type Store struct{
 		Create(context.Context, *Post) error
 		DeleteByID(context.Context, int64) error
 		UpdatePost(context.Context, *Post) error
+		GetUserFeed(context.Context, int64, PaginatedFeedQuery) ([]PostWithMetadata, error)
 	}
 	Users interface{
 		Create(context.Context, *User) error
+		GetByID(context.Context, int64) (*User, error)
 	}
 	Comments interface{
 		GetByPostID(context.Context, int64) ([]Comment, error)
 		Create(context.Context, *Comment) error
+	}
+	Followers interface{
+		Follow(context.Context, int64, int64) error
+		Unfollow(context.Context, int64, int64) error
 	}
 }
 
@@ -33,5 +40,6 @@ func NewPostgresStore(db *sql.DB) Store{
 		Posts: &PostStore{db},
 		Users: &UserStore{db},
 		Comments: &CommentStore{db},
+		Followers: &FollowerStore{db},
 	}
 }

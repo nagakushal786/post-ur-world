@@ -25,3 +25,10 @@ func (app *application) notFoundError(w http.ResponseWriter, req *http.Request, 
 
 	writeError(w, http.StatusNotFound, "Not found")
 }
+
+func (app *application) conflictError(w http.ResponseWriter, req *http.Request, err error){
+	log.Printf("Conflict error: %s, path: %s, error: %s",
+               req.Method, req.URL.Path, err.Error())
+
+	writeError(w, http.StatusConflict, err.Error())
+}

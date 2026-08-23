@@ -10,6 +10,25 @@ import (
 	"github.com/nagakushal786/post-ur-world/internal/store"
 )
 
+const version = "0.0.1"
+
+// @title Post Ur World API
+// @description API for post ur world, a platform to interact with fellow engineers
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @BasePath /v1
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+// @description
+
 func main(){
 	godotenv.Load()
 
@@ -37,6 +56,11 @@ func main(){
 	if max_idle_time==""{
 		log.Fatal("DB_MAX_IDLE_TIME is not found in environment")
 	}
+
+	api_url:=os.Getenv("API_URL")
+	if api_url==""{
+		log.Fatal("API_URL is not found in environment")
+	}
 	
 	cfg:=config{
 		addr: ":"+portString,
@@ -46,6 +70,7 @@ func main(){
 			maxIdleConns: max_idle_conns,
 			maxIdleTime: max_idle_time,
 		},
+		apiURL: api_url,
 	}
 
 	db, err:=db.New(

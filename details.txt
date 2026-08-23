@@ -33,3 +33,9 @@ By organising the code in a modular and flexible way, you can more easily introd
 11. To test the concurrency of users updating a post: go run scripts/test_concurrency.go
 12. Since we dont care about the existing data, firstly to remove the existing data before seeding, run: TRUNCATE TABLE comments, posts, users RESTART IDENTITY CASCADE;
 13. To create the seed for the database: go run cmd/migrate/seed/main.go
+14. Swagger documentation: https://github.com/swaggo/swag/cmd/swag@latest (install)
+    -> Run the command "swag init -g cmd/api/main.go"
+    -> Even the command can be "swag init -g ./api/main.go -d cmd,internal && swag fmt"
+    -> Then add this command in pre_cmd of .air.toml
+15. HTTP swagger: https://github.com/swaggo/http-swagger (get)
+16. Swagger url: http://localhost:8080/v1/swagger/index.html 

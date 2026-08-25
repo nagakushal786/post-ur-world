@@ -41,3 +41,4 @@ By organising the code in a modular and flexible way, you can more easily introd
 16. Swagger url: http://localhost:8080/v1/swagger/index.html
 17. Standard logging: go.uber.org/zap (get)
 18. Hashing: golang.org/x/crypto/bcrypt (get)
+19. Token generation: github.com/google/uuid (get)

@@ -24,5 +24,5 @@ func main(){
 	defer conn.Close()
 
 	store:=store.NewPostgresStore(conn)
-	db.Seed(store)
+	db.Seed(store, conn)
 }

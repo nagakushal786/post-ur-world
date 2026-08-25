@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -11,17 +10,24 @@ import (
 	"github.com/nagakushal786/post-ur-world/internal/store"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"github.com/nagakushal786/post-ur-world/docs"
+	"go.uber.org/zap"
 )
 
 type application struct{
 	config config
 	store store.Store
+	logger *zap.SugaredLogger
 }
 
 type config struct{
 	addr string
 	db dbConfig
 	apiURL string
+	mail mailConfig
+}
+
+type mailConfig struct{
+	exp time.Duration
 }
 
 type dbConfig struct{
@@ -62,6 +68,8 @@ func (app *application) mount() http.Handler{
 
 		// /v1/users
 		r.Route("/users", func(r chi.Router){
+			r.Put("/activate/{token}", app.activateUserHandler)
+
 			r.Route("/{userID}", func(r chi.Router){
 				r.Use(app.usersContextMiddleware)
 
@@ -73,6 +81,11 @@ func (app *application) mount() http.Handler{
 			r.Group(func(r chi.Router){
 				r.Get("/feed", app.getUserFeedHandler)
 			})
+		})
+
+		// Public routes
+		r.Route("/authentication", func(r chi.Router){
+			r.Post("/register", app.registerUserHandler)
 		})
 	})
 
@@ -93,7 +106,7 @@ func (app *application) run(router http.Handler) error{
 		IdleTimeout: time.Minute,
 	}
 
-	log.Printf("Server has started at port %s", app.config.addr)
+	app.logger.Infow("Server has started", "addr", app.config.addr)
 
 	return srv.ListenAndServe()
 }

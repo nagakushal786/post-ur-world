@@ -38,4 +38,6 @@ By organising the code in a modular and flexible way, you can more easily introd
     -> Even the command can be "swag init -g ./api/main.go -d cmd,internal && swag fmt"
     -> Then add this command in pre_cmd of .air.toml
 15. HTTP swagger: https://github.com/swaggo/http-swagger (get)
-16. Swagger url: http://localhost:8080/v1/swagger/index.html 
+16. Swagger url: http://localhost:8080/v1/swagger/index.html
+17. Standard logging: go.uber.org/zap (get)
+18. Hashing: golang.org/x/crypto/bcrypt (get)

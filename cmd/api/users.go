@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/nagakushal786/post-ur-world/internal/store"
 )
 
@@ -110,4 +111,35 @@ func (app *application) unfollowUserHandler(w http.ResponseWriter, req *http.Req
 	if err:=app.jsonResponse(w, http.StatusNoContent, nil); err!=nil{
 		app.internalServerError(w, req, err)
 	}
+}
+
+// ActivateUser godoc
+//
+// @Summary Activates/Register a user
+// @Description Activates/Register a user profile by invitation token 
+// @Tags users
+// @Produce json
+// @Param token path string true "Invitation token"
+// @Success 204 {string} string "User activated"
+// @Failure 404 {object} error
+// @Failure 500 {object} error
+// @Security ApiKeyAuth
+// @Router /users/activate/{token} [put]
+func (app *application) activateUserHandler(w http.ResponseWriter, req *http.Request){
+	token:=chi.URLParam(req, "token")
+
+	ctx:=req.Context()
+	err:=app.store.Users.Activate(ctx, token)
+
+	if err!=nil{
+		switch err{
+			case store.ErrNotFound:
+				app.notFoundError(w, req, err)
+			default:
+				app.internalServerError(w, req, err)
+		}
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

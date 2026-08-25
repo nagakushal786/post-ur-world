@@ -4,10 +4,12 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/nagakushal786/post-ur-world/internal/db"
 	"github.com/nagakushal786/post-ur-world/internal/store"
+	"go.uber.org/zap"
 )
 
 const version = "0.0.1"
@@ -71,8 +73,16 @@ func main(){
 			maxIdleTime: max_idle_time,
 		},
 		apiURL: api_url,
+		mail: mailConfig{
+			exp: time.Hour*24*3, // 3 days
+		},
 	}
 
+	// Logger
+	logger:=zap.Must(zap.NewProduction()).Sugar()
+	defer logger.Sync()
+
+	// Database
 	db, err:=db.New(
 		cfg.db.addr,
 		cfg.db.maxOpenConns,
@@ -80,19 +90,20 @@ func main(){
 		cfg.db.maxIdleTime,
 	)
 	if err!=nil{
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 
 	defer db.Close()
-	log.Println("Database connection pool established")
+	logger.Info("Database connection pool established")
 
 	store:=store.NewPostgresStore(db)
 
 	app:=&application{
 		config: cfg,
 		store: store,
+		logger: logger,
 	}
 
 	router:=app.mount()
-	log.Fatal(app.run(router))
+	logger.Fatal(app.run(router))
 }

@@ -8,6 +8,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/nagakushal786/post-ur-world/internal/db"
+	"github.com/nagakushal786/post-ur-world/internal/mailer"
 	"github.com/nagakushal786/post-ur-world/internal/store"
 	"go.uber.org/zap"
 )
@@ -59,9 +60,29 @@ func main(){
 		log.Fatal("DB_MAX_IDLE_TIME is not found in environment")
 	}
 
+	env:=os.Getenv("ENV")
+	if env==""{
+		log.Fatal("ENV is not found in environment")
+	}
+
 	api_url:=os.Getenv("API_URL")
 	if api_url==""{
 		log.Fatal("API_URL is not found in environment")
+	}
+
+	sendGrid_api_key:=os.Getenv("SENDGRID_API_KEY")
+	if sendGrid_api_key==""{
+		log.Fatal("API Key is not found in environment")
+	}
+
+	from_email:=os.Getenv("FROM_EMAIL")
+	if from_email==""{
+		log.Fatal("FROM_EMAIL is not found in environment")
+	}
+
+	frontend_url:=os.Getenv("FRONTEND_URL")
+	if frontend_url==""{
+		log.Fatal("FRONTEND_URL is not found in environment")
 	}
 	
 	cfg:=config{
@@ -73,9 +94,15 @@ func main(){
 			maxIdleTime: max_idle_time,
 		},
 		apiURL: api_url,
+		env: env,
 		mail: mailConfig{
 			exp: time.Hour*24*3, // 3 days
+			sendGrid: sendGridConfig{
+				apiKey: sendGrid_api_key,
+			},
+			fromEmail: from_email,
 		},
+		frontendURL: frontend_url,
 	}
 
 	// Logger
@@ -98,10 +125,13 @@ func main(){
 
 	store:=store.NewPostgresStore(db)
 
+	mailer:=mailer.NewSendGrid(cfg.mail.sendGrid.apiKey, cfg.mail.fromEmail)
+
 	app:=&application{
 		config: cfg,
 		store: store,
 		logger: logger,
+		mailer: mailer,
 	}
 
 	router:=app.mount()

@@ -7,9 +7,10 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/nagakushal786/post-ur-world/docs"
+	"github.com/nagakushal786/post-ur-world/internal/mailer"
 	"github.com/nagakushal786/post-ur-world/internal/store"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
-	"github.com/nagakushal786/post-ur-world/docs"
 	"go.uber.org/zap"
 )
 
@@ -17,17 +18,26 @@ type application struct{
 	config config
 	store store.Store
 	logger *zap.SugaredLogger
+	mailer mailer.Client
 }
 
 type config struct{
 	addr string
 	db dbConfig
+	env string
 	apiURL string
 	mail mailConfig
+	frontendURL string
 }
 
 type mailConfig struct{
 	exp time.Duration
+	sendGrid sendGridConfig
+	fromEmail string
+}
+
+type sendGridConfig struct{
+	apiKey string
 }
 
 type dbConfig struct{
@@ -106,7 +116,7 @@ func (app *application) run(router http.Handler) error{
 		IdleTimeout: time.Minute,
 	}
 
-	app.logger.Infow("Server has started", "addr", app.config.addr)
+	app.logger.Infow("Server has started", "addr", app.config.addr, "env", app.config.env)
 
 	return srv.ListenAndServe()
 }

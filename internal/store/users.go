@@ -115,6 +115,20 @@ func (s *UserStore) GetByID(ctx context.Context, userID int64) (*User, error){
 	return &user, nil
 }
 
+func (s *UserStore) Delete(ctx context.Context, userID int64) error{
+	return withTx(s.db, ctx, func(tx *sql.Tx) error{
+		if err:=s.deleteUser(ctx, tx, userID); err!=nil{
+			return err
+		}
+
+		if err:=s.deleteUserInvitation(ctx, tx, userID); err!=nil{
+			return err
+		}
+
+		return nil
+	})
+}
+
 func (s *UserStore) CreateAndInvite(ctx context.Context, user *User, token string, invitationExp time.Duration) error{
 	return withTx(s.db, ctx, func(tx *sql.Tx) error{
 		// Create a user
@@ -233,6 +247,20 @@ func (s *UserStore) update(ctx context.Context, tx *sql.Tx, user *User) error{
 
 func (s *UserStore) deleteUserInvitation(ctx context.Context, tx *sql.Tx, userID int64) error{
 	query:=`delete from user_invitations where user_id=$1;`
+
+	ctx, cancel:=context.WithTimeout(ctx, QueryTimeoutDuration)
+	defer cancel()
+
+	_, err:=tx.ExecContext(ctx, query, userID)
+	if err!=nil{
+		return err
+	}
+
+	return nil
+}
+
+func (s *UserStore) deleteUser(ctx context.Context, tx *sql.Tx, userID int64) error{
+	query:=`delete from users where id=$1;`
 
 	ctx, cancel:=context.WithTimeout(ctx, QueryTimeoutDuration)
 	defer cancel()

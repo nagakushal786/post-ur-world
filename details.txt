@@ -47,3 +47,4 @@ By organising the code in a modular and flexible way, you can more easily introd
     -> Go to: https://app.sendgrid.com/login and create an account
     -> Then go to: https://app.sendgrid.com/settings/api_keys and create an API key and set it in your .env file
     -> Last go to: https://app.sendgrid.com/settings/sender_auth and select "Single Sender Verification" and verify your from email and set it in your .env file
+22. CORS: https://github.com/go-chi/cors (get)

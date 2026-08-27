@@ -12,6 +12,7 @@ import (
 	"github.com/nagakushal786/post-ur-world/internal/store"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"go.uber.org/zap"
+	"github.com/go-chi/cors"
 )
 
 type application struct{
@@ -49,6 +50,15 @@ type dbConfig struct{
 
 func (app *application) mount() http.Handler{
 	router:=chi.NewRouter()
+
+	router.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"https://*", "http://*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300,
+	}))
 
 	router.Use(middleware.RequestID)
 	router.Use(middleware.ClientIPFromRemoteAddr)

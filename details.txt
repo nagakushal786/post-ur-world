@@ -42,7 +42,7 @@ By organising the code in a modular and flexible way, you can more easily introd
 17. Standard logging: https://go.uber.org/zap (get)
 18. Hashing: golang.org/x/crypto/bcrypt (get)
 19. Token generation: https://github.com/google/uuid (get)
-20. Mailer: https://github.com/sendgrid/sendgrid-go
+20. Mailer: https://github.com/sendgrid/sendgrid-go (get)
 21. For SendGrid API key and Sender Verification:
     -> Go to: https://app.sendgrid.com/login and create an account
     -> Then go to: https://app.sendgrid.com/settings/api_keys and create an API key and set it in your .env file

@@ -42,10 +42,12 @@ func (app *application) createPostHandler(w http.ResponseWriter, req *http.Reque
 		return
 	}
 
+	user:=getUserFromCtx(req)
+
 	post:=&store.Post{
 		Title: payload.Title,
 		Content: payload.Content,
-		UserID: 1,
+		UserID: user.ID,
 		Tags: payload.Tags,
 	}
 

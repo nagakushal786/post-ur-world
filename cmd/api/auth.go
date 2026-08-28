@@ -5,7 +5,9 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/http"
+	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/nagakushal786/post-ur-world/internal/mailer"
 	"github.com/nagakushal786/post-ur-world/internal/store"
@@ -49,6 +51,9 @@ func (app *application) registerUserHandler(w http.ResponseWriter, req *http.Req
 	user:=&store.User{
 		Username: payload.Username,
 		Email: payload.Email,
+		Role: store.Role{
+			Name: "user",
+		},
 	}
 
 	if err:=user.Password.Set(payload.Password); err!=nil{
@@ -107,6 +112,71 @@ func (app *application) registerUserHandler(w http.ResponseWriter, req *http.Req
 	app.logger.Infow("Email sent successfully", "status code", status)
 
 	if err:=app.jsonResponse(w, http.StatusCreated, userWithToken); err!=nil{
+		app.internalServerError(w, req, err)
+	}
+}
+
+type CreateUserTokenPayload struct{
+	Email string `json:"email" validate:"required,email,max=255"`
+	Password string `json:"password" validate:"required,min=3,max=72"`
+}
+
+// CreateToken godoc
+//
+// @Summary Creates a token
+// @Description Creates a token
+// @Tags authentication
+// @Accept json
+// @Produce json
+// @Param payload body CreateUserTokenPayload true "User Credentials"
+// @Success 200 {object} string "Token created"
+// @Failure 400 {object} error
+// @Failure 401 {object} error
+// @Failure 500 {object} error
+// @Router /authentication/token [post]
+func (app *application) createTokenHandler(w http.ResponseWriter, req *http.Request){
+	// parse payload credentials
+	var payload CreateUserTokenPayload
+	if err:=readJSON(w, req, &payload); err!=nil{
+		app.badRequestError(w, req, err)
+		return
+	}
+
+	if err:=Validate.Struct(payload); err!=nil{
+		app.badRequestError(w, req, err)
+		return
+	}
+
+	// fetch the user from credentials
+	user, err:=app.store.Users.GetByEmail(req.Context(), payload.Email)
+	if err!=nil{
+		switch err{
+			case store.ErrNotFound:
+				app.unAuthorizationError(w, req, err)
+			default:
+				app.internalServerError(w, req, err)
+		}
+		return
+	}
+
+	// generate token -> add claims
+	claims:=jwt.MapClaims{
+		"sub": user.ID,
+		"exp": time.Now().Add(app.config.auth.token.exp).Unix(),
+		"iat": time.Now().Unix(),
+		"nbf": time.Now().Unix(),
+		"iss": app.config.auth.token.issuer,
+		"aud": app.config.auth.token.audience,
+	}
+
+	token, err:=app.authenticator.GenerateToken(claims)
+	if err!=nil{
+		app.internalServerError(w, req, err)
+		return
+	}
+
+	// send it to the client
+	if err:=app.jsonResponse(w, http.StatusCreated, token); err!=nil{
 		app.internalServerError(w, req, err)
 	}
 }

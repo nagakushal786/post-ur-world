@@ -1,0 +1,2 @@
+ALTER TABLE users
+DROP COLUMN row_id;

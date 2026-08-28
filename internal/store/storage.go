@@ -27,6 +27,7 @@ type Store struct{
 		CreateAndInvite(context.Context, *User, string, time.Duration) error
 		Activate(context.Context, string) error
 		Delete(context.Context, int64) error
+		GetByEmail(context.Context, string) (*User, error)
 	}
 	Comments interface{
 		GetByPostID(context.Context, int64) ([]Comment, error)
@@ -36,6 +37,9 @@ type Store struct{
 		Follow(context.Context, int64, int64) error
 		Unfollow(context.Context, int64, int64) error
 	}
+	Roles interface{
+		GetByName(context.Context, string) (*Role, error)
+	}
 }
 
 func NewPostgresStore(db *sql.DB) Store{
@@ -44,6 +48,7 @@ func NewPostgresStore(db *sql.DB) Store{
 		Users: &UserStore{db},
 		Comments: &CommentStore{db},
 		Followers: &FollowerStore{db},
+		Roles: &RoleStore{db},
 	}
 }
 

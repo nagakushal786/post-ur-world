@@ -7,12 +7,13 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"github.com/nagakushal786/post-ur-world/docs"
+	"github.com/nagakushal786/post-ur-world/internal/auth"
 	"github.com/nagakushal786/post-ur-world/internal/mailer"
 	"github.com/nagakushal786/post-ur-world/internal/store"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"go.uber.org/zap"
-	"github.com/go-chi/cors"
 )
 
 type application struct{
@@ -20,6 +21,7 @@ type application struct{
 	store store.Store
 	logger *zap.SugaredLogger
 	mailer mailer.Client
+	authenticator auth.Authenticator
 }
 
 type config struct{
@@ -29,6 +31,24 @@ type config struct{
 	apiURL string
 	mail mailConfig
 	frontendURL string
+	auth authConfig
+}
+
+type authConfig struct{
+	basic basicConfig
+	token tokenConfig
+}
+
+type basicConfig struct{
+	username string
+	password string
+}
+
+type tokenConfig struct{
+	secret string
+	exp time.Duration
+	issuer string
+	audience string
 }
 
 type mailConfig struct{
@@ -68,21 +88,22 @@ func (app *application) mount() http.Handler{
 	router.Use(middleware.Timeout(60*time.Second))
 	
 	router.Route("/v1", func(r chi.Router){
-		r.Get("/health", app.healthCheckHandler)
+		r.With(app.BasicAuthMiddleware()).Get("/health", app.healthCheckHandler)
 
 		docsURL:=fmt.Sprintf("%s/swagger/doc.json", app.config.addr)
 		r.Get("/swagger/*", httpSwagger.Handler(httpSwagger.URL(docsURL)))
 
 		// /v1/posts
 		r.Route("/posts", func(r chi.Router){
+			r.Use(app.AuthTokenMiddleware)
 			r.Post("/", app.createPostHandler)
 
 			r.Route("/{postID}", func (r chi.Router){
 				r.Use(app.postsContextMiddleware)
 
 				r.Get("/", app.getPostHandler)
-				r.Delete("/", app.deletePostHandler)
-				r.Patch("/", app.updatePostHandler)
+				r.Delete("/", app.checkPostOwnership("admin", app.deletePostHandler))
+				r.Patch("/", app.checkPostOwnership("moderator", app.updatePostHandler))
 			})
 		})
 
@@ -91,7 +112,7 @@ func (app *application) mount() http.Handler{
 			r.Put("/activate/{token}", app.activateUserHandler)
 
 			r.Route("/{userID}", func(r chi.Router){
-				r.Use(app.usersContextMiddleware)
+				r.Use(app.AuthTokenMiddleware)
 
 				r.Get("/", app.getUserHandler)
 				r.Put("/follow", app.followUserHandler)
@@ -99,6 +120,7 @@ func (app *application) mount() http.Handler{
 			})
 
 			r.Group(func(r chi.Router){
+				r.Use(app.AuthTokenMiddleware)
 				r.Get("/feed", app.getUserFeedHandler)
 			})
 		})
@@ -106,6 +128,7 @@ func (app *application) mount() http.Handler{
 		// Public routes
 		r.Route("/authentication", func(r chi.Router){
 			r.Post("/register", app.registerUserHandler)
+			r.Post("/token", app.createTokenHandler)
 		})
 	})
 

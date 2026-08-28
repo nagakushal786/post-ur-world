@@ -2,14 +2,11 @@ package main
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/nagakushal786/post-ur-world/internal/store"
 )
-
-type FollowUser struct{
-	UserID int64 `json:"user_id"`
-}
 
 func getUserFromCtx(req *http.Request) *store.User{
 	user, _:=req.Context().Value(userCtx).(*store.User)
@@ -53,16 +50,14 @@ func (app *application) getUserHandler(w http.ResponseWriter, req *http.Request)
 // @Router /users/{userID}/follow [put]
 func (app *application) followUserHandler(w http.ResponseWriter, req *http.Request){
 	followerUser:=getUserFromCtx(req)
-
-	// Revert back to auth userID from ctx
-	var payload FollowUser
-	if err:=readJSON(w, req, &payload); err!=nil{
+	followedID, err:=strconv.ParseInt(chi.URLParam(req, "userID"), 10, 64)
+	if err!=nil{
 		app.badRequestError(w, req, err)
 		return
 	}
 
 	ctx:=req.Context()
-	err:=app.store.Followers.Follow(ctx, followerUser.ID, payload.UserID)
+	err=app.store.Followers.Follow(ctx, followerUser.ID, followedID)
 	if err!=nil{
 		switch err{
 			case store.ErrConflict:
@@ -93,16 +88,14 @@ func (app *application) followUserHandler(w http.ResponseWriter, req *http.Reque
 // @Router /users/{userID}/unfollow [put]
 func (app *application) unfollowUserHandler(w http.ResponseWriter, req *http.Request){
 	unfollowedUser:=getUserFromCtx(req)
-
-	// Revert back to auth userID from ctx
-	var payload FollowUser
-	if err:=readJSON(w, req, &payload); err!=nil{
+	unfollowedID, err:=strconv.ParseInt(chi.URLParam(req, "userID"), 10, 64)
+	if err!=nil{
 		app.badRequestError(w, req, err)
 		return
 	}
 
 	ctx:=req.Context()
-	err:=app.store.Followers.Unfollow(ctx, unfollowedUser.ID, payload.UserID)
+	err=app.store.Followers.Unfollow(ctx, unfollowedUser.ID, unfollowedID)
 	if err!=nil{
 		app.internalServerError(w, req, err)
 		return

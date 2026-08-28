@@ -29,3 +29,24 @@ func (app *application) conflictError(w http.ResponseWriter, req *http.Request, 
 
 	writeError(w, http.StatusConflict, err.Error())
 }
+
+func (app *application) unAuthorizationError(w http.ResponseWriter, req *http.Request, err error){
+	app.logger.Warnf("Unauthorized error", "method", req.Method, "path", req.URL.Path, "error", err.Error())
+
+	writeError(w, http.StatusNotFound, "Unauthorized")
+}
+
+func (app *application) unAuthorizationBasicError(w http.ResponseWriter, req *http.Request, err error){
+	app.logger.Warnf("Unauthorized error", "method", req.Method, "path", req.URL.Path, "error", err.Error())
+
+	// This will cause a pop-up
+	w.Header().Set("WWW-Authenticate", `Basic realm="restricted", charset="UTF-8"`)
+
+	writeError(w, http.StatusUnauthorized, "Unauthorized")
+}
+
+func (app *application) forbiddenResponse(w http.ResponseWriter, req *http.Request){
+	app.logger.Warnw("Forbidden", "method", req.Method, "path", req.URL.Path)
+
+	writeError(w, http.StatusForbidden, "Forbidden")
+}

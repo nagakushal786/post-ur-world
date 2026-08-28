@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/nagakushal786/post-ur-world/internal/auth"
 	"github.com/nagakushal786/post-ur-world/internal/db"
 	"github.com/nagakushal786/post-ur-world/internal/mailer"
 	"github.com/nagakushal786/post-ur-world/internal/store"
@@ -84,7 +85,22 @@ func main(){
 	if frontend_url==""{
 		log.Fatal("FRONTEND_URL is not found in environment")
 	}
-	
+
+	auth_basic_user:=os.Getenv("AUTH_BASIC_USER")
+	if auth_basic_user==""{
+		log.Fatal("AUTH_BASIC_USER is not found in environment")
+	}
+
+	auth_basic_pass:=os.Getenv("AUTH_BASIC_PASS")
+	if auth_basic_pass==""{
+		log.Fatal("AUTH_BASIC_PASS is not found in environment")
+	}
+
+	auth_token_secret:=os.Getenv("AUTH_TOKEN_SECRET")
+	if auth_token_secret==""{
+		log.Fatal("AUTH_TOKEN_SECRET is not found in environment")
+	}
+		
 	cfg:=config{
 		addr: ":"+portString,
 		db: dbConfig{
@@ -103,6 +119,18 @@ func main(){
 			fromEmail: from_email,
 		},
 		frontendURL: frontend_url,
+		auth: authConfig{
+			basic: basicConfig{
+				username: auth_basic_user,
+				password: auth_basic_pass,
+			},
+			token: tokenConfig{
+				secret: auth_token_secret,
+				exp: time.Hour*24*3,
+				issuer: "posturworld",
+				audience: "posturworld",
+			},
+		},
 	}
 
 	// Logger
@@ -127,11 +155,14 @@ func main(){
 
 	mailer:=mailer.NewSendGrid(cfg.mail.sendGrid.apiKey, cfg.mail.fromEmail)
 
+	jwtAuthenticator:=auth.NewJWTAuthenticator(cfg.auth.token.secret, cfg.auth.token.issuer, cfg.auth.token.audience)
+
 	app:=&application{
 		config: cfg,
 		store: store,
 		logger: logger,
 		mailer: mailer,
+		authenticator: jwtAuthenticator,
 	}
 
 	router:=app.mount()

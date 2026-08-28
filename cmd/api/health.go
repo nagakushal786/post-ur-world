@@ -15,7 +15,7 @@ import (
 func (app *application) healthCheckHandler(w http.ResponseWriter, req *http.Request){
 	data:=map[string]string{
 		"status": "ok",
-		"env": "Encrypted",
+		"env": app.config.env,
 		"version": "0.0.1",
 	}
 

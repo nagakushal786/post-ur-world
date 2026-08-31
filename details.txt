@@ -67,3 +67,4 @@ By organising the code in a modular and flexible way, you can more easily introd
     -> Check this with REDIS_ENABLED with true and false to see the optimization difference.
 31. For testing: go test -v ./cmd/api
 32. For mock testing: https://github.com/stretchr/testify (get)
+33. To get the PID of server: lsof -i :[PORT]

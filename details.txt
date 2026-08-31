@@ -18,6 +18,10 @@ By organising the code in a modular and flexible way, you can more easily introd
 3. env: https://github.com/joho/godotenv (get)
 4. Postgres driver: https://github.com/lib/pq (get)
 5. To compose docker.yml file: docker compose up --build
+   - To make it work without any error:
+     1. Run the command "sudo systemctl status postgresql" and check the status is active/inactive
+     2. If active, run the command "sudo systemctl stop postgresql"
+     3. Inorder to make it remain inactive even after boot, run the command "sudo systemctl disable postgresql"
 6. SQL migrations: https://github.com/golang-migrate/migrate (install)
 7. To create migrations:
    migrate create -seq -ext sql -dir ./cmd/migrate/migrations create_users
@@ -49,3 +53,15 @@ By organising the code in a modular and flexible way, you can more easily introd
     -> Last go to: https://app.sendgrid.com/settings/sender_auth and select "Single Sender Verification" and verify your from email and set it in your .env file
 22. CORS: https://github.com/go-chi/cors (get)
 23. JWT token generation: https://github.com/golang-jwt/jwt (get)
+24. Redis Caching server: docker run -d --rm --name puw-redis -p 6379:6379 redis:6.2-alpine redis-server --loglevel warning
+    -> Run the command "sudo systemctl status redis" to get the status
+    -> If the status is active, run the command "sudo systemctl stop redis" before running the docker command
+25. To check the services run by docker: docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Ports}}"
+26. If we want to get the CLI (recommended), refer the docker-compose.yml redis configuration instead of following the above command.
+    -> We will have redis-cli and redis-commander
+    -> Since postgresql is running through docker, better to make redis also run through docker.
+27. Redis Client for Go: https://github.com/go-redis/redis/v8 (get) (redis-6)
+28. To get the keys of redis server: docker exec -it [Redis ID] redis-cli KEYS "*" (Get Redis ID by running 25)
+29. To get the value of particular redis key: docker exec -it [Redis ID] redis-cli GET [Redis Key]
+30. To check the performance: npx autocannon http://localhost:[PORT_ADDR]/users/{LoggedID} --connections 10 --duration 5 -H "Authorization: Bearer [AuthToken]"
+    -> Check this with REDIS_ENABLED with true and false to see the optimization difference

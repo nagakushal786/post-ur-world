@@ -12,6 +12,7 @@ import (
 	"github.com/nagakushal786/post-ur-world/internal/auth"
 	"github.com/nagakushal786/post-ur-world/internal/mailer"
 	"github.com/nagakushal786/post-ur-world/internal/store"
+	"github.com/nagakushal786/post-ur-world/internal/store/cache"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"go.uber.org/zap"
 )
@@ -22,6 +23,7 @@ type application struct{
 	logger *zap.SugaredLogger
 	mailer mailer.Client
 	authenticator auth.Authenticator
+	cacheStorage cache.Storage
 }
 
 type config struct{
@@ -32,6 +34,14 @@ type config struct{
 	mail mailConfig
 	frontendURL string
 	auth authConfig
+	redisCfg redisConfig
+}
+
+type redisConfig struct{
+	addr string
+	pw string
+	db int
+	enabled bool
 }
 
 type authConfig struct{

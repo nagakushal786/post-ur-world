@@ -6,11 +6,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/joho/godotenv"
 	"github.com/nagakushal786/post-ur-world/internal/auth"
 	"github.com/nagakushal786/post-ur-world/internal/db"
 	"github.com/nagakushal786/post-ur-world/internal/mailer"
 	"github.com/nagakushal786/post-ur-world/internal/store"
+	"github.com/nagakushal786/post-ur-world/internal/store/cache"
 	"go.uber.org/zap"
 )
 
@@ -100,6 +102,23 @@ func main(){
 	if auth_token_secret==""{
 		log.Fatal("AUTH_TOKEN_SECRET is not found in environment")
 	}
+
+	redis_addr:=os.Getenv("REDIS_ADDR")
+	if redis_addr==""{
+		log.Fatal("REDIS_ADDR is not found in environment")
+	}
+
+	redis_pw:=os.Getenv("REDIS_PW")
+
+	redis_db, err:=strconv.Atoi(os.Getenv("REDIS_DB"))
+	if err!=nil{
+		log.Fatal("REDIS_DB is not found in environment")
+	}
+
+	redis_enabled, err:=strconv.ParseBool(os.Getenv("REDIS_ENABLED"))
+	if err!=nil{
+		log.Fatal("REDIS_ENABLED is not found in environment")
+	}
 		
 	cfg:=config{
 		addr: ":"+portString,
@@ -131,6 +150,12 @@ func main(){
 				audience: "posturworld",
 			},
 		},
+		redisCfg: redisConfig{
+			addr: redis_addr,
+			pw: redis_pw,
+			db: redis_db,
+			enabled: redis_enabled,
+		},
 	}
 
 	// Logger
@@ -151,7 +176,15 @@ func main(){
 	defer db.Close()
 	logger.Info("Database connection pool established")
 
+	// Cache
+	var rdb *redis.Client
+	if cfg.redisCfg.enabled{
+		rdb=cache.NewRedisClient(cfg.redisCfg.addr, cfg.redisCfg.pw, cfg.redisCfg.db)
+		logger.Info("Redis connection pool established")
+	}
+
 	store:=store.NewPostgresStore(db)
+	cacheStorage:=cache.NewRedisStorage(rdb)
 
 	mailer:=mailer.NewSendGrid(cfg.mail.sendGrid.apiKey, cfg.mail.fromEmail)
 
@@ -163,6 +196,7 @@ func main(){
 		logger: logger,
 		mailer: mailer,
 		authenticator: jwtAuthenticator,
+		cacheStorage: cacheStorage,
 	}
 
 	router:=app.mount()

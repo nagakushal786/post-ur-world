@@ -16,6 +16,7 @@ import (
 	"github.com/nagakushal786/post-ur-world/docs"
 	"github.com/nagakushal786/post-ur-world/internal/auth"
 	"github.com/nagakushal786/post-ur-world/internal/mailer"
+	"github.com/nagakushal786/post-ur-world/internal/ratelimiter"
 	"github.com/nagakushal786/post-ur-world/internal/store"
 	"github.com/nagakushal786/post-ur-world/internal/store/cache"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
@@ -29,6 +30,7 @@ type application struct{
 	mailer mailer.Client
 	authenticator auth.Authenticator
 	cacheStorage cache.Storage
+	rateLimiter ratelimiter.Limiter
 }
 
 type config struct{
@@ -40,6 +42,7 @@ type config struct{
 	frontendURL string
 	auth authConfig
 	redisCfg redisConfig
+	rateLimiterCfg ratelimiter.Config
 }
 
 type redisConfig struct{
@@ -100,10 +103,14 @@ func (app *application) mount() http.Handler{
 	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
 
+	if app.config.rateLimiterCfg.Enabled{
+		router.Use(app.RateLimiterMiddleware)
+	}
+
 	router.Use(middleware.Timeout(60*time.Second))
 	
 	router.Route("/v1", func(r chi.Router){
-		r.With(app.BasicAuthMiddleware()).Get("/health", app.healthCheckHandler)
+		r.Get("/health", app.healthCheckHandler)
 
 		docsURL:=fmt.Sprintf("%s/swagger/doc.json", app.config.addr)
 		r.Get("/swagger/*", httpSwagger.Handler(httpSwagger.URL(docsURL)))

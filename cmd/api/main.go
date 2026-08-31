@@ -11,6 +11,7 @@ import (
 	"github.com/nagakushal786/post-ur-world/internal/auth"
 	"github.com/nagakushal786/post-ur-world/internal/db"
 	"github.com/nagakushal786/post-ur-world/internal/mailer"
+	"github.com/nagakushal786/post-ur-world/internal/ratelimiter"
 	"github.com/nagakushal786/post-ur-world/internal/store"
 	"github.com/nagakushal786/post-ur-world/internal/store/cache"
 	"go.uber.org/zap"
@@ -119,6 +120,16 @@ func main(){
 	if err!=nil{
 		log.Fatal("REDIS_ENABLED is not found in environment")
 	}
+
+	rl_requests_count, err:=strconv.Atoi(os.Getenv("RATELIMITER_REQUESTS_COUNT"))
+	if err!=nil{
+		log.Fatal("RATELIMITER_REQUESTS_COUNT is not found in environment")
+	}
+
+	rl_enabled, err:=strconv.ParseBool(os.Getenv("RATELIMITER_ENABLED"))
+	if err!=nil{
+		log.Fatal("RATELIMITER_ENABLED is not found in environment")
+	}
 		
 	cfg:=config{
 		addr: ":"+portString,
@@ -156,6 +167,11 @@ func main(){
 			db: redis_db,
 			enabled: redis_enabled,
 		},
+		rateLimiterCfg: ratelimiter.Config{
+			RequestsPerTimeFrame: rl_requests_count,
+			TimeFrame: time.Second*5,
+			Enabled: rl_enabled,
+		},
 	}
 
 	// Logger
@@ -183,6 +199,12 @@ func main(){
 		logger.Info("Redis connection pool established")
 	}
 
+	// Rate Limiter
+	rateLimiter:=ratelimiter.NewFixedWindowLimiter(
+		cfg.rateLimiterCfg.RequestsPerTimeFrame,
+		cfg.rateLimiterCfg.TimeFrame,
+	)
+
 	store:=store.NewPostgresStore(db)
 	cacheStorage:=cache.NewRedisStorage(rdb)
 
@@ -197,6 +219,7 @@ func main(){
 		mailer: mailer,
 		authenticator: jwtAuthenticator,
 		cacheStorage: cacheStorage,
+		rateLimiter: rateLimiter,
 	}
 
 	router:=app.mount()

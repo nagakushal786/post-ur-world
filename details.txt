@@ -64,4 +64,6 @@ By organising the code in a modular and flexible way, you can more easily introd
 28. To get the keys of redis server: docker exec -it [Redis ID] redis-cli KEYS "*" (Get Redis ID by running 25)
 29. To get the value of particular redis key: docker exec -it [Redis ID] redis-cli GET [Redis Key]
 30. To check the performance: npx autocannon http://localhost:[PORT_ADDR]/users/{LoggedID} --connections 10 --duration 5 -H "Authorization: Bearer [AuthToken]"
-    -> Check this with REDIS_ENABLED with true and false to see the optimization difference
+    -> Check this with REDIS_ENABLED with true and false to see the optimization difference.
+31. For testing: go test -v ./cmd/api
+32. For mock testing: https://github.com/stretchr/testify (get)

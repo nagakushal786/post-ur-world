@@ -33,7 +33,7 @@ func (app *application) conflictError(w http.ResponseWriter, req *http.Request, 
 func (app *application) unAuthorizationError(w http.ResponseWriter, req *http.Request, err error){
 	app.logger.Warnf("Unauthorized error", "method", req.Method, "path", req.URL.Path, "error", err.Error())
 
-	writeError(w, http.StatusNotFound, "Unauthorized")
+	writeError(w, http.StatusUnauthorized, "Unauthorized")
 }
 
 func (app *application) unAuthorizationBasicError(w http.ResponseWriter, req *http.Request, err error){

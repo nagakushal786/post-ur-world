@@ -73,3 +73,8 @@ By organising the code in a modular and flexible way, you can more easily introd
     -r: No of requests
     -d: Duration
     -c: Concurrency
+
+CI:
+35. Checking out a repo: https://github.com/actions/checkout
+36. Setting up Go: https://github.com/actions/setup-go
+37. For static checks: honnef.co/go/tools/cmd/staticcheck@latest (install)

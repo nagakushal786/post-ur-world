@@ -89,7 +89,6 @@ func (app *application) registerUserHandler(w http.ResponseWriter, req *http.Req
 
 	activationURL:=fmt.Sprintf("%s/confirm/%s", app.config.frontendURL, plainToken)
 
-	IsProdEnv:=app.config.env=="production"
 	vars:=struct{
 		Username string
 		ActivationURL string
@@ -99,7 +98,14 @@ func (app *application) registerUserHandler(w http.ResponseWriter, req *http.Req
 	}
 
 	// send email
-	status, err:=app.mailer.Send(mailer.UserWelcomeTemplate, user.Username, user.Email, vars, !IsProdEnv)
+
+	// For development
+	isSandbox:=false
+	status, err:=app.mailer.Send(mailer.UserWelcomeTemplate, user.Username, user.Email, vars, isSandbox)
+
+	// For production by setting env to "production"
+	// IsProdEnv:=app.config.env=="production"
+	// status, err:=app.mailer.Send(mailer.UserWelcomeTemplate, user.Username, user.Email, vars, !IsProdEnv)
 	if err!=nil{
 		app.logger.Errorf("Error sending invitation mail", "error", err)
 

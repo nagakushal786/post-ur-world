@@ -45,7 +45,7 @@ func (m *SendGridMailer) Send(templateFile, username, email string, data any, is
 	body:=new(bytes.Buffer)
 	err=tmpl.ExecuteTemplate(body, "body", data)
 	if err!=nil{
-		return -1, nil
+		return -1, err
 	}
 
 	message:=mail.NewSingleEmail(from, subject.String(), to, "", body.String())

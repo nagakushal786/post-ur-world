@@ -83,3 +83,5 @@ CD: Versioning and releasing
 38. Automatic releases based on conventional commits: https://github.com/googleapis/release-please-action
 39. To get the "MY_RELEASE_PLEASE_TOKEN" present in release-please.yaml, go to "https://github.com/settings/personal-access-tokens" and create a new token with the actions, content, pull requests permissions (all read and write).
 40. Then come to "https://github.com/[GITHUB USERNAME]/[REPO NAME]/settings/secrets/actions", click on "New repository secret" and add the token with the name "MY_RELEASE_PLEASE_TOKEN".
+41. Make sure you commit with "feat:" in the commit comment.
+42. Merge the commit in pull requests and then run the command "git pull" in your project terminal.

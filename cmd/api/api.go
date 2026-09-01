@@ -110,7 +110,9 @@ func (app *application) mount() http.Handler{
 	router.Use(middleware.Timeout(60*time.Second))
 	
 	router.Route("/v1", func(r chi.Router){
-		r.Get("/health", app.healthCheckHandler)
+		// Operations
+		r.With(app.BasicAuthMiddleware()).Get("/health", app.healthCheckHandler)
+		r.With(app.BasicAuthMiddleware()).Get("/metrics", app.metricsHandler())
 
 		docsURL:=fmt.Sprintf("%s/swagger/doc.json", app.config.addr)
 		r.Get("/swagger/*", httpSwagger.Handler(httpSwagger.URL(docsURL)))

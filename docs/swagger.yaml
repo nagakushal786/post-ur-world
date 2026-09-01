@@ -178,7 +178,7 @@ info:
     email: support@swagger.io
     name: API Support
     url: http://www.swagger.io/support
-  description: API for post ur world, a platform to interact with fellow engineers
+  description: Basic authentication
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
@@ -254,9 +254,26 @@ paths:
           description: ok
           schema:
             type: string
+      security:
+      - BasicAuth: []
       summary: Health check
       tags:
       - health
+  /metrics:
+    get:
+      description: Returns application metrics
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Application metrics
+      tags:
+      - metrics
   /posts:
     post:
       consumes:
@@ -561,7 +578,10 @@ paths:
       - feed
 securityDefinitions:
   ApiKeyAuth:
+    description: JWT Bearer token authentication
     in: header
     name: Authorization
     type: apiKey
+  BasicAuth:
+    type: basic
 swagger: "2.0"

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"expvar"
 	"net/http"
 )
 
@@ -11,6 +12,7 @@ import (
 // @Tags health
 // @Produce json
 // @Success 200 {object} string "ok"
+// @Security BasicAuth
 // @Router /health [get]
 func (app *application) healthCheckHandler(w http.ResponseWriter, req *http.Request){
 	data:=map[string]string{
@@ -22,4 +24,17 @@ func (app *application) healthCheckHandler(w http.ResponseWriter, req *http.Requ
 	if err:=app.jsonResponse(w, http.StatusOK, data); err!=nil{
 		app.internalServerError(w, req, err)
 	}
+}
+
+// MetricsChecker godoc
+//
+// @Summary Application metrics
+// @Description Returns application metrics
+// @Tags metrics
+// @Produce text/plain
+// @Success 200 {object} string "ok"
+// @Security BasicAuth
+// @Router /metrics [get]
+func (app *application) metricsHandler() http.HandlerFunc{
+	return expvar.Handler().ServeHTTP
 }

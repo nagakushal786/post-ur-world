@@ -1,8 +1,10 @@
 package main
 
 import (
+	"expvar"
 	"log"
 	"os"
+	"runtime"
 	"strconv"
 	"time"
 
@@ -34,7 +36,10 @@ const version = "0.0.1"
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization
-// @description
+// @description JWT Bearer token authentication
+
+// @securityDefinitions.basic BasicAuth
+// @description Basic authentication
 
 func main(){
 	godotenv.Load()
@@ -221,6 +226,19 @@ func main(){
 		cacheStorage: cacheStorage,
 		rateLimiter: rateLimiter,
 	}
+
+	// Metrics collected
+
+	// Version
+	expvar.NewString("version").Set(version)
+	// Database
+	expvar.Publish("database", expvar.Func(func() any{
+		return db.Stats()
+	}))
+	// Number of go-routines
+	expvar.Publish("goroutines", expvar.Func(func() any{
+		return runtime.NumGoroutine()
+	}))
 
 	router:=app.mount()
 	logger.Fatal(app.run(router))

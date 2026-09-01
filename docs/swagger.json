@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "API for post ur world, a platform to interact with fellow engineers",
+        "description": "Basic authentication",
         "title": "Post Ur World API",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
@@ -106,6 +106,11 @@
         },
         "/health": {
             "get": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
                 "description": "Health check endpoint",
                 "produces": [
                     "application/json"
@@ -114,6 +119,31 @@
                     "health"
                 ],
                 "summary": "Health check",
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/metrics": {
+            "get": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Returns application metrics",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "metrics"
+                ],
+                "summary": "Application metrics",
                 "responses": {
                     "200": {
                         "description": "ok",
@@ -850,9 +880,13 @@
     },
     "securityDefinitions": {
         "ApiKeyAuth": {
+            "description": "JWT Bearer token authentication",
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"
+        },
+        "BasicAuth": {
+            "type": "basic"
         }
     }
 }

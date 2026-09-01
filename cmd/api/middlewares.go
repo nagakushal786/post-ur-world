@@ -46,38 +46,13 @@ func (app *application) postsContextMiddleware(next http.Handler) http.Handler{
 	})
 }
 
-func (app *application) usersContextMiddleware(next http.Handler) http.Handler{
-	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request){
-		userID, err:=strconv.ParseInt(chi.URLParam(req, "userID"), 10, 64)
-		if err!=nil{
-			app.badRequestError(w, req, err)
-			return
-		}
-
-		ctx:=req.Context()
-		user, err:=app.store.Users.GetByID(ctx, userID)
-		if err!=nil{
-			switch err{
-				case store.ErrNotFound:
-					app.notFoundError(w, req, err)
-				default:
-					app.internalServerError(w, req, err)
-			}
-			return
-		}
-
-		ctx=context.WithValue(ctx, userCtx, user)
-		next.ServeHTTP(w, req.WithContext(ctx))
-	})
-}
-
 func (app *application) BasicAuthMiddleware() func(http.Handler) http.Handler{
 	return func(next http.Handler) http.Handler{
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request){
 			// read the auth header
 			authHeader:=req.Header.Get("Authorization")
 			if authHeader==""{
-				app.unAuthorizationBasicError(w, req, fmt.Errorf("Authorization header is missing"))
+				app.unAuthorizationBasicError(w, req, fmt.Errorf("authorization header is missing"))
 				return
 			}
 
@@ -85,7 +60,7 @@ func (app *application) BasicAuthMiddleware() func(http.Handler) http.Handler{
 			// parse it to base64 string
 			parts:=strings.Split(authHeader, " ")
 			if len(parts)!=2 || parts[0]!="Basic"{
-				app.unAuthorizationBasicError(w, req, fmt.Errorf("Authorization header is malformed"))
+				app.unAuthorizationBasicError(w, req, fmt.Errorf("authorization header is malformed"))
 				return
 			}
 
@@ -102,7 +77,7 @@ func (app *application) BasicAuthMiddleware() func(http.Handler) http.Handler{
 			// check the credentials
 			creds:=strings.SplitN(string(decoded), ":", 2)
 			if len(creds)!=2 || creds[0]!=username || creds[1]!=password{
-				app.unAuthorizationBasicError(w, req, fmt.Errorf("Invalid credentials"))
+				app.unAuthorizationBasicError(w, req, fmt.Errorf("invalid credentials"))
 				return
 			}
 
@@ -116,7 +91,7 @@ func (app *application) AuthTokenMiddleware(next http.Handler) http.Handler{
 		// read the auth header
 		authHeader:=req.Header.Get("Authorization")
 		if authHeader==""{
-			app.unAuthorizationError(w, req, fmt.Errorf("Authorization header is missing"))
+			app.unAuthorizationError(w, req, fmt.Errorf("authorization header is missing"))
 			return
 		}
 
@@ -124,7 +99,7 @@ func (app *application) AuthTokenMiddleware(next http.Handler) http.Handler{
 		// parse it to base64 string
 		parts:=strings.Split(authHeader, " ")
 		if len(parts)!=2 || parts[0]!="Bearer"{
-			app.unAuthorizationError(w, req, fmt.Errorf("Authorization header is malformed"))
+			app.unAuthorizationError(w, req, fmt.Errorf("authorization header is malformed"))
 			return
 		}
 

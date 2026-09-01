@@ -19,7 +19,7 @@ import (
 	"go.uber.org/zap"
 )
 
-const version = ""
+const version = "1.1.0"
 
 // @title Post Ur World API
 // @description API for post ur world, a platform to interact with fellow engineers

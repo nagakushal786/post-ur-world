@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/nagakushal786/post-ur-world/compare/v1.1.0...v1.2.0) (2026-09-01)
+
+
+### Features
+
+* Dockerfile ([b07af91](https://github.com/nagakushal786/post-ur-world/commit/b07af9176f369bb09bcd299a12bc60b75819307d))
+
 ## [1.1.0](https://github.com/nagakushal786/post-ur-world/compare/v1.0.0...v1.1.0) (2026-09-01)
 
 

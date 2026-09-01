@@ -1,0 +1,24 @@
+# Run tests
+make test
+
+# Create a new migration (name goes at the end, no quotes needed)
+make migrate-create create_users_table
+
+# Apply all up migrations
+make migrate-up
+
+# Roll back N down migrations
+make migrate-down 1
+
+# Seed the database (run truncate first if you want a clean slate)
+make truncate
+make seed
+
+# Regenerate swagger docs
+make gen-docs
+
+# Start the app with hot reload
+make watch
+
+# Bring up Postgres/Redis via docker-compose
+make docker-up

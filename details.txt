@@ -86,3 +86,7 @@ CD: Versioning and releasing
 41. Make sure you commit with "feat:" in the commit comment.
 42. Merge the commit in pull requests and then run the command "git pull" in your project terminal.
 43. Now update the "update-api-version.yaml" file and commit with feat message and push it. You will observe the version changed and merge the pull request. Then you will see the release created in the releases section of your repo.
+
+Deployment:
+44. In supabase, create a new database and get the connection string and replace the DB_URL in the .env file and run the migrations.
+45. During the deployment, give that connection string as the DB_URL env value.
